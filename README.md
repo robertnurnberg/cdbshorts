@@ -12,6 +12,10 @@ Generate puzzles from the cdb database, which are unique best moves that change 
 
 Check positions in the cdb local copy for positions where an unseen move to an existing cdb position would change the evaluation of the position 'significantly'.
 
+### fakeleaves
+
+Check positions in cdb local copy with one scored move, out of multiple legal that connect to a scored position.
+
 ## usage
 
 ### building
