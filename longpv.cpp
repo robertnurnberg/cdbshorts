@@ -6,8 +6,9 @@
 #include "external/chess.hpp"
 using namespace chess;
 
-std::vector<Move> pv_explore(Board &board, const int margin, int budget,
-                             size_t &query_count, const std::uintptr_t handle) {
+std::vector<Move> pv_explore(Board &board, std::vector<Move> &sequence,
+                             const int margin, int budget, size_t &query_count,
+                             const std::uintptr_t handle) {
 
   std::vector<Move> pv;
 
@@ -16,7 +17,10 @@ std::vector<Move> pv_explore(Board &board, const int margin, int budget,
 
   if (board.occ().count() <= 7) // TB
   {
-    std::cout << "Hit TB" << std::endl;
+    std::cout << "Hit TB: ";
+    for (auto &m : sequence)
+      std::cout << uci::moveToUci(m) << " ";
+    std::cout << "\n" << std::endl;
     return pv;
   }
 
@@ -42,8 +46,10 @@ std::vector<Move> pv_explore(Board &board, const int margin, int budget,
 
     Move move = uci::uciToMove(board, m.first);
     board.makeMove<true>(move);
+    sequence.push_back(move);
     std::vector<Move> sub_pv =
-        pv_explore(board, margin, budget, query_count, handle);
+        pv_explore(board, sequence, margin, budget, query_count, handle);
+    sequence.pop_back();
 
     if (sub_pv.size() + 1 > pv.size()) {
       pv.clear();
@@ -74,11 +80,13 @@ int main(int argc, char **argv) {
   Board board(fen);
 
   std::cout << "Looking at fen: " << fen << std::endl;
+  std::vector<Move> sequence;
 
   for (int budget = 1; budget < 14; budget += 2) {
     for (int margin = -1; margin <= 0; margin += 1) {
       size_t query_count = 0;
-      auto pv = pv_explore(board, margin, budget, query_count, handle);
+      auto pv =
+          pv_explore(board, sequence, margin, budget, query_count, handle);
       std::cout << "cp margin from bestmove " << margin << " search budget "
                 << budget << " found PV len: " << pv.size() << " using "
                 << query_count << " queries. " << fen << " moves ";
