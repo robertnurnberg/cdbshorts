@@ -6,29 +6,35 @@
 #include "external/chess.hpp"
 using namespace chess;
 
-int pv_explore(Board &board, const int margin, int budget, size_t &query_count,
-               const std::uintptr_t handle) {
+std::vector<Move> pv_explore(Board &board, const int margin, int budget,
+                             size_t &query_count, const std::uintptr_t handle) {
 
-  int pv_len = 0;
+  std::vector<Move> pv;
 
   if (budget < 0)
-    return pv_len;
+    return pv;
+
+  if (board.occ().count() <= 7) // TB
+  {
+    std::cout << "Hit TB" << std::endl;
+    return pv;
+  }
 
   auto res = board.isGameOver();
   if (res.second != GameResult::NONE)
-    return pv_len;
+    return pv;
 
   query_count++;
   auto r = cdbdirect_get(handle, board.getFen(false));
 
   if (r.size() < 2)
-    return pv_len;
+    return pv;
 
   auto &best_move = r[0];
 
   for (auto &m : r) {
 
-    if (m.first == "a0a0")
+    if (m.first == "a0a0" || budget < 0)
       break;
 
     if (m.first != best_move.first && m.second + margin < best_move.second)
@@ -36,43 +42,50 @@ int pv_explore(Board &board, const int margin, int budget, size_t &query_count,
 
     Move move = uci::uciToMove(board, m.first);
     board.makeMove<true>(move);
-    pv_len = std::max(
-        pv_len, 1 + pv_explore(board, margin, budget, query_count, handle));
+    std::vector<Move> sub_pv =
+        pv_explore(board, margin, budget, query_count, handle);
+
+    if (sub_pv.size() + 1 > pv.size()) {
+      pv.clear();
+      pv.push_back(move);
+      for (auto &sm : sub_pv)
+        pv.push_back(sm);
+    }
     board.unmakeMove(move);
 
     budget--;
   }
 
-  return pv_len;
+  return pv;
 }
 
-int main() {
+int main(int argc, char **argv) {
   std::uintptr_t handle = cdbdirect_initialize(CHESSDB_PATH);
 
   std::uint64_t db_size = cdbdirect_size(handle);
   std::cout << "DB count: " << db_size << std::endl;
 
   std::string fen;
-  fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -";   // startpos
-  fen = "rnbqkbnr/pppppppp/8/8/6P1/8/PPPPPP1P/RNBQKBNR b KQkq -"; // 1. g4
-  fen =
-      "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq -"; // ruy
-                                                                       // lopez
-  fen = "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq -";      // 1. d4
+  fen = "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq -"; // 1. d4
+  std::cout << "argc" << argc << std::endl;
+  if (argc == 2)
+    fen = argv[1];
 
   Board board(fen);
 
   std::cout << "Looking at fen: " << fen << std::endl;
 
-  for (int budget = 1; budget < 10; budget += 2) {
-    for (int margin = -1; margin <= 3; margin += 1) {
+  for (int budget = 1; budget < 14; budget += 2) {
+    for (int margin = -1; margin <= 0; margin += 1) {
       size_t query_count = 0;
-      int len = pv_explore(board, margin, budget, query_count, handle);
+      auto pv = pv_explore(board, margin, budget, query_count, handle);
       std::cout << "cp margin from bestmove " << margin << " search budget "
-                << budget << " found PV len: " << len << " using "
-                << query_count << " queries." << std::endl;
+                << budget << " found PV len: " << pv.size() << " using "
+                << query_count << " queries. " << fen << " moves ";
+      for (auto &m : pv)
+        std::cout << uci::moveToUci(m) << " ";
+      std::cout << "\n" << std::endl;
     }
-    std::cout << std::endl;
   }
 
   cdbdirect_finalize(handle);
