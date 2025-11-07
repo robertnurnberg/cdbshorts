@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
 
   std::string fen;
   fen = "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq -"; // 1. d4
-  std::cout << "argc" << argc << std::endl;
+  //
   if (argc == 2)
     fen = argv[1];
 

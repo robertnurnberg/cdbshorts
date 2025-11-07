@@ -24,6 +24,10 @@ construct opening books, with properties on the eval as well as the PV
 
 find longer PVs for given fens
 
+### shortpv
+
+find the fens that are PV endpoints no longer in cdb
+
 ## usage
 
 ### building
