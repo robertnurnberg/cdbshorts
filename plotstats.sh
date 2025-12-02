@@ -8,6 +8,8 @@ set ytics nomirror
 set ylabel "has ply \\& eval"
 set y2label "ply \\& pc \\& mob"
 set format x "%.0s%c"
+set autoscale xfix
+#set xrange [50000000000:*]
 set terminal png
 set output "stats.png"
 
