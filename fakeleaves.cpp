@@ -20,10 +20,12 @@ int main() {
 
   // setup of a function that will be called for each entry in the db,
   // multithreaded
-  size_t max_entries = std::min(10'000'000UL, db_size);
+  size_t max_entries = db_size;
   std::atomic<size_t> count_total(0);
   constexpr int num_buckets = 256;
   std::array<std::atomic<size_t>, num_buckets> count_fake{};
+  std::mutex io_mutex;
+  std::ofstream file_fens("fakeleaves.epd");
   auto start = std::chrono::steady_clock::now();
 
   auto evaluate_entry =
@@ -32,7 +34,7 @@ int main() {
         // count entries
         size_t peek = count_total.fetch_add(1, std::memory_order_relaxed);
         // status update
-        if (peek % 10000 == 0 && peek > 0) {
+        if (peek % 1000000 == 0 && peek > 0) {
           auto end = std::chrono::steady_clock::now();
           auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
               end - start);
@@ -53,6 +55,10 @@ int main() {
             2) // only retain positions with exactly 1 scored move
           return peek < max_entries;
 
+        const auto min_ply = scored.back().second;
+        if (min_ply < 0) // min_ply should be defined
+          return peek < max_entries;
+
         Board board(fen);
         Movelist moves;
         movegen::legalmoves(moves, board);
@@ -65,8 +71,11 @@ int main() {
         auto r = cdbdirect_wrapper(handle, board);
         board.unmakeMove(move);
 
-        if (r.size() > 1)
+        if (r.size() > 1) {
           count_fake[std::clamp(scored[1].second, 0, num_buckets - 1)]++;
+          const std::lock_guard<std::mutex> lock(io_mutex);
+          file_fens << fen << " c0 " << min_ply << "\n";
+        }
 
         return peek < max_entries; // continue iteration as long as true
       };
@@ -87,6 +96,8 @@ int main() {
   std::cout << "Total fake leaves: " << total_fake << "\n";
   std::cout << "Percentage: " << 100 * double(total_fake) / max_entries
             << std::endl;
+
+  file_fens.close();
 
   cdbdirect_finalize(handle);
   return 0;
