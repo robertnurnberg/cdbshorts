@@ -1,4 +1,5 @@
 #include "cdbdirect.h"
+#include "cdbshorts.h"
 #include <atomic>
 #include <chrono>
 #include <cmath>
@@ -42,16 +43,16 @@ int main() {
           Board board(fen); // board.set960(true); doens't work this way yet.
           Move move = uci::uciToMove(board, scored[0].first);
           board.makeMove<true>(move);
-          auto newFen = board.getFen(false);
-          auto r = cdbdirect_get(handle, newFen);
-          board.unmakeMove(move);
-          if (r.size() < 2) {
+          auto r = cdbdirect_wrapper(handle, board);
+          // does bestmove lead to unknown eligible position?
+          if (r.size() == 1 && r[0].second == -2) {
             count_edgy.fetch_add(1, std::memory_order_relaxed);
             count_edgy_ply.fetch_add(scored.back().second,
                                      std::memory_order_relaxed);
             const std::lock_guard<std::mutex> lock(io_mutex);
-            file_fens << newFen << "\n";
+            file_fens << board.getFen(false) << "\n";
           }
+          board.unmakeMove(move);
         }
 
         // status update
