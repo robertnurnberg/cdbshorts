@@ -14,7 +14,6 @@ using namespace chess;
 
 int main() {
   std::uintptr_t handle = cdbdirect_initialize(CHESSDB_PATH);
-
   std::uint64_t db_size = cdbdirect_size(handle);
   std::cout << "DB count: " << db_size << std::endl;
 
@@ -64,8 +63,8 @@ int main() {
           return peek < max_entries;
 
         // collect properties of the PV
-        Board board(fen);
-        Move move = uci::uciToMove(board, scored[0].first);
+        Board board(fen, true);
+        Move move = cdbuci_to_move(board, scored[0].first);
         constexpr int pv_len = 10;
         std::array<Move, pv_len> pv;
         int ply = 0;
@@ -81,7 +80,7 @@ int main() {
                   10) // difference between the first two moves is small
             uncertain++;
           ply++;
-          move = uci::uciToMove(board, r[0].first);
+          move = cdbuci_to_move(board, r[0].first);
         }
         int max_ply = ply;
         while (ply >= 0) {

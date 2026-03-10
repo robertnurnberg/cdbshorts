@@ -14,7 +14,6 @@ using namespace chess;
 
 int main() {
   std::uintptr_t handle = cdbdirect_initialize(CHESSDB_PATH);
-
   std::uint64_t db_size = cdbdirect_size(handle);
   std::cout << "DB count: " << db_size << std::endl;
 
@@ -37,11 +36,9 @@ int main() {
         assert(scored.size() > 1);
 
         // find best moves with edgy score, but that are not further explored.
-        //  also require they are connected to root as a quick hack to avoid
-        //  960.
-        if (abs(abs(scored[0].second) - 100) < 5 && scored.back().second > 0) {
-          Board board(fen); // board.set960(true); doens't work this way yet.
-          Move move = uci::uciToMove(board, scored[0].first);
+        if (abs(abs(scored[0].second) - 100) < 5) {
+          Board board(fen, true);
+          Move move = cdbuci_to_move(board, scored[0].first);
           board.makeMove<true>(move);
           auto r = cdbdirect_wrapper(handle, board);
           // does bestmove lead to unknown eligible position?
@@ -50,7 +47,7 @@ int main() {
             count_edgy_ply.fetch_add(scored.back().second,
                                      std::memory_order_relaxed);
             const std::lock_guard<std::mutex> lock(io_mutex);
-            file_fens << board.getFen(false) << "\n";
+            file_fens << board.getXfen(false) << "\n";
           }
           board.unmakeMove(move);
         }

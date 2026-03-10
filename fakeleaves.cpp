@@ -14,7 +14,6 @@ using namespace chess;
 
 int main() {
   std::uintptr_t handle = cdbdirect_initialize(CHESSDB_PATH);
-
   std::uint64_t db_size = cdbdirect_size(handle);
   std::cout << "DB count: " << db_size << std::endl;
 
@@ -53,14 +52,14 @@ int main() {
             2) // only retain positions with exactly 1 scored move
           return peek < max_entries;
 
-        Board board(fen);
+        Board board(fen, true);
         Movelist moves;
         movegen::legalmoves(moves, board);
 
         if (moves.size() <= 1)
           return peek < max_entries;
 
-        Move move = uci::uciToMove(board, scored[0].first);
+        Move move = cdbuci_to_move(board, scored[0].first);
         board.makeMove<true>(move);
         auto r = cdbdirect_wrapper(handle, board);
         board.unmakeMove(move);

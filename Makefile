@@ -20,4 +20,4 @@ clean:
 	rm -f $(BINARIES)
 
 format:
-	clang-format -i $(SOURCES)
+	clang-format -i $(SOURCES) $(HEADERS)
