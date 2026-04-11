@@ -7,7 +7,7 @@ LIBS = -lcdbdirect -lterarkdb -lterark-zip-r -lboost_fiber -lboost_context -pthr
 CXXFLAGS = -std=c++20 -O3 -march=native -fomit-frame-pointer -finline -flto=auto -g
 CXXFLAGS += -DCHESSDB_PATH=\"$(CHESSDB_PATH)\"
 
-HEADERS = cdbshorts.h
+HEADERS = cdbshorts.h gameprogress.hpp
 SOURCES = puzzles.cpp unseen.cpp fakeleaves.cpp books.cpp longpv.cpp shortpv.cpp edgy.cpp minply.cpp
 BINARIES = $(SOURCES:.cpp=)
 
@@ -20,4 +20,4 @@ clean:
 	rm -f $(BINARIES)
 
 format:
-	clang-format -i $(SOURCES)
+	clang-format -i $(SOURCES) $(HEADERS)
