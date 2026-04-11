@@ -8,7 +8,7 @@
 #include <set>
 #include <unistd.h>
 
-#include "cdbshorts.h"
+#include "cdbshorts.hpp"
 #include "external/chess.hpp"
 #include "gameprogress.hpp"
 
