@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
         start_fen = argv[1];
         start_depth = std::stoull(argv[2]);
     }
-    Board start_board(start_fen);
+    Board start_board(start_fen, true);
     std::cout << "Counting subtree and minply distribution for fen: " << start_fen << std::endl;
     PackedBoard start_packed_board = Board::Compact::encode(start_board);
     auto db_lookup = cdbdirect_wrapper(handle, start_board);
@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
                     break;
                 }
 
-                Move move = uci::uciToMove(cur_position, cur_move.first);
+                Move move = cdbuci_to_move(cur_position, cur_move.first);
                 cur_position.makeMove<true>(move);
                 PackedBoard packed_next_board = Board::Compact::encode(cur_position);
 
