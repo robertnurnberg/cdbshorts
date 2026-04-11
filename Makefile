@@ -6,12 +6,17 @@ TERARKDBROOT = ../terarkdb
 CDBDIRECTROOT = ../cdbdirect
 
 LDFLAGS = -L$(TERARKDBROOT)/output/lib -L$(CDBDIRECTROOT)
-LIBS = -lcdbdirect -lterarkdb -lterark-zip-r -lboost_fiber -lboost_context -ltcmalloc -pthread -lgcc -lrt -ldl -ltbb -laio -lgomp -lsnappy -llz4 -lz -lbz2
-CXXFLAGS = -std=c++20 -O3 -march=native -fomit-frame-pointer -finline -flto=auto
-CXXFLAGS += -DCHESSDB_PATH=\"$(CHESSDB_PATH)\"
+LIBS = -lcdbdirect -lterarkdb -lterark-zip-r -lboost_fiber -lboost_context -pthread -lgcc -lrt -ldl -ltbb -laio -lgomp -lsnappy -llz4 -lz -lbz2
 
-HEADERS = cdbshorts.h
-SOURCES = puzzles.cpp unseen.cpp fakeleaves.cpp books.cpp longpv.cpp shortpv.cpp edgy.cpp
+CXXFLAGS = -std=c++20 -march=native -flto=auto -DCHESSDB_PATH=\"$(CHESSDB_PATH)\"
+ifdef DEBUG
+  CXXFLAGS += -O0 -g -UNDEBUG
+else
+  CXXFLAGS += -O3 -g -DNDEBUG -fomit-frame-pointer -finline
+endif
+
+HEADERS = cdbshorts.h gameprogress.hpp
+SOURCES = puzzles.cpp unseen.cpp fakeleaves.cpp books.cpp longpv.cpp shortpv.cpp edgy.cpp minply.cpp
 BINARIES = $(SOURCES:.cpp=)
 
 all: $(BINARIES)
@@ -23,4 +28,4 @@ clean:
 	rm -f $(BINARIES)
 
 format:
-	clang-format -i $(SOURCES)
+	clang-format -i $(SOURCES) $(HEADERS)
