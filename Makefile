@@ -12,7 +12,7 @@ else
   CXXFLAGS += -O3 -g -DNDEBUG -fomit-frame-pointer -finline
 endif
 
-HEADERS = cdbshorts.h gameprogress.hpp
+HEADERS = cdbshorts.hpp gameprogress.hpp
 SOURCES = puzzles.cpp unseen.cpp fakeleaves.cpp books.cpp longpv.cpp shortpv.cpp edgy.cpp minply.cpp
 BINARIES = $(SOURCES:.cpp=)
 
