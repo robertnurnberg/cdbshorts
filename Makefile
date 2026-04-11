@@ -4,8 +4,13 @@ CHESSDB_PATH = /mnt/ssd/chess-20251115/data/
 
 LDFLAGS = -L$(TERARKDBROOT)/output/lib -L$(CDBDIRECTROOT)
 LIBS = -lcdbdirect -lterarkdb -lterark-zip-r -lboost_fiber -lboost_context -pthread -lgcc -lrt -ldl -ltbb -laio -lgomp -lsnappy -llz4 -lz -lbz2
-CXXFLAGS = -std=c++20 -O3 -march=native -fomit-frame-pointer -finline -flto=auto -g
-CXXFLAGS += -DCHESSDB_PATH=\"$(CHESSDB_PATH)\"
+
+CXXFLAGS = -std=c++20 -march=native -DCHESSDB_PATH=\"$(CHESSDB_PATH)\"
+ifdef DEBUG
+  CXXFLAGS += -O0 -g -UNDEBUG
+else
+  CXXFLAGS += -O3 -g -DNDEBUG -fomit-frame-pointer -finline -flto=auto
+endif
 
 HEADERS = cdbshorts.h gameprogress.hpp
 SOURCES = puzzles.cpp unseen.cpp fakeleaves.cpp books.cpp longpv.cpp shortpv.cpp edgy.cpp minply.cpp
