@@ -1,5 +1,5 @@
 #include "cdbdirect.h"
-#include "cdbshorts.h"
+#include "cdbshorts.hpp"
 #include <cmath>
 #include <cstdint>
 #include <fstream>
