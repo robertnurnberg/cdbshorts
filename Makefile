@@ -1,7 +1,7 @@
 TERARKDBROOT = /home/vondele/chess/noob/terarkdb
 CDBDIRECTROOT = /home/vondele/chess/vondele/cdbdirect
 CHESSDB_PATH = /mnt/ssd/chess-20251115/data/
-CHESSDB_PATH = /media/ssd_t7/chessdb/chess-20251115/data
+CHESSDB_PATH = /media/ssd_t7/chessdb/chess-20260702/data
 TERARKDBROOT = ../terarkdb
 CDBDIRECTROOT = ../cdbdirect
 
